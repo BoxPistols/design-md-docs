@@ -334,4 +334,4 @@ fi
 
 ---
 
-戻る: [README](../README.md)
+次: [デザイナー不在の組織での運用](06-orgs-without-designers.md)
