@@ -1,0 +1,94 @@
+name: lint DESIGN.md
+
+# テンプレートと、リポジトリ内のあらゆる DESIGN.md を検証する。
+# CLI 側の未実装分（重複見出し・不正な色出力）は自前でチェックを足している。
+#   → docs/05-pitfalls.md
+
+on:
+  push:
+    branches: [main]
+    paths: ['**/DESIGN.md', '.github/workflows/lint.yml']
+  pull_request:
+    paths: ['**/DESIGN.md', '.github/workflows/lint.yml']
+  workflow_dispatch:
+
+# CLI は alpha 段階なので固定する。上げるときは意図的に上げ、docs/05-pitfalls.md を再検証する。
+env:
+  DESIGN_MD_VERSION: '0.4.0'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: DESIGN.md を収集
+        id: collect
+        run: |
+          files=$(find . -name 'DESIGN.md' -not -path './node_modules/*' | sort)
+          if [ -z "$files" ]; then
+            echo "DESIGN.md が見つかりません"; exit 1
+          fi
+          echo "見つかったファイル:"; echo "$files"
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$files" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: 構造検証（lint）
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do
+            echo "::group::lint $f"
+            npx -y "@google/design.md@${DESIGN_MD_VERSION}" lint "$f"
+            echo "::endgroup::"
+          done <<< "${{ steps.collect.outputs.files }}"
+
+      - name: 重複セクション見出しの検出
+        # 仕様は「エラーでファイルを拒否」と定めるが CLI は未実装 (docs/05-pitfalls.md §4)
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r f; do
+            dupes=$(grep -E '^## ' "$f" | sort | uniq -d || true)
+            if [ -n "$dupes" ]; then
+              echo "::error file=$f::重複したセクション見出し: $(echo "$dupes" | tr '\n' ' ')"
+              status=1
+            fi
+          done <<< "${{ steps.collect.outputs.files }}"
+          exit $status
+
+      - name: export 出力の健全性チェック
+        # 一部の色記法が無効な CSS を生む (docs/05-pitfalls.md §3)
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r f; do
+            out=$(npx -y "@google/design.md@${DESIGN_MD_VERSION}" export --format css-tailwind "$f")
+            # 6桁hex の直後に ; ) 空白 以外が続くものは壊れた出力 (例: #00ff00-ff)
+            if bad=$(echo "$out" | grep -nE '#[0-9a-fA-F]{6}[^;)[:space:]]'); then
+              echo "::error file=$f::不正な色の出力: $bad"
+              status=1
+            fi
+          done <<< "${{ steps.collect.outputs.files }}"
+          exit $status
+
+      - name: トークン消失の検出（PR のみ）
+        # base と比較し、意図しない removed が無いか見る。
+        # {参照} の破損などは無警告でトークンごと消えるため (docs/05-pitfalls.md §2)
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          while IFS= read -r f; do
+            if git show "origin/${{ github.base_ref }}:$f" > /tmp/base.md 2>/dev/null; then
+              echo "::group::diff $f"
+              npx -y "@google/design.md@${DESIGN_MD_VERSION}" diff /tmp/base.md "$f" || true
+              echo "::endgroup::"
+            else
+              echo "$f は新規ファイルのため diff をスキップ"
+            fi
+          done <<< "${{ steps.collect.outputs.files }}"
