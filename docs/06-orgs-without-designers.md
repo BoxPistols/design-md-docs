@@ -193,4 +193,4 @@ DESIGN.md が効くのは「**何らかの意見はあるが、それを実行�
 
 ---
 
-戻る: [README](../README.md)
+次: [実装が仕様を守っているか機械で判定する](07-machine-verification.md)

@@ -51,6 +51,7 @@ Architectural Minimalism meets Journalistic Gravitas.
 | 4 | [書き方ガイド](docs/04-writing-guide.md) | 良い DESIGN.md の条件。レビュー観点 |
 | 5 | [落とし穴](docs/05-pitfalls.md) | **仕様どおりに書くと壊れる箇所**。実測済み |
 | 6 | [デザイナー不在の組織での運用](docs/06-orgs-without-designers.md) | CSS を書ける人がいない組織で、何が効いて何が効かないか |
+| 7 | [実装が仕様を守っているか機械で判定する](docs/07-machine-verification.md) | **実験記録**。決定的チェッカと LLM judge を並走させて測った |
 
 はじめての人は 1 → 3 → 4 の順が早いです。2 と 5 は書きながら引く辞書として使ってください。
 
@@ -90,7 +91,11 @@ npx @google/design.md export --format css-tailwind DESIGN.md > theme.css
 ```
 docs/         解説（上表）
 templates/    出発点にできる DESIGN.md
-tools/        実測スクリプト（統計の再現用）
+sandbox/      実験環境（docs/07 の素材。3つの実装バリアントとスクショ）
+tools/        実測・判定スクリプト
+              measure.py  … 実物74件の統計（docs/03 の再現）
+              shoot.mjs   … スクリーンショット
+              probe.mjs   … 決定的チェッカ（docs/07 の再現）
 ```
 
 ---

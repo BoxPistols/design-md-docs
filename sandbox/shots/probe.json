@@ -1,0 +1,47 @@
+{
+  "a-compliant": [],
+  "b-all-violations": [
+    {
+      "rule": "V3-radius",
+      "el": "div.card",
+      "value": "18px"
+    },
+    {
+      "rule": "V4-shadow",
+      "el": "div.card",
+      "value": "rgba(30, 26, 23, 0.28) 0px 12px 32px 0px"
+    },
+    {
+      "rule": "V1-accent-on-text",
+      "el": "h1.title",
+      "value": "rgb(156, 59, 38)"
+    },
+    {
+      "rule": "V2-bold",
+      "el": "h1.title",
+      "value": "800"
+    },
+    {
+      "rule": "V3-radius",
+      "el": "button.button",
+      "value": "999px"
+    },
+    {
+      "rule": "V5-gradient",
+      "el": "button.button",
+      "value": "linear-gradient(135deg, rgb(196, 81, 47) 0%, rgb(110, 37, 23"
+    }
+  ],
+  "c-partial": [
+    {
+      "rule": "V4-shadow",
+      "el": "div.card",
+      "value": "rgba(30, 26, 23, 0.28) 0px 12px 32px 0px"
+    },
+    {
+      "rule": "V2-bold",
+      "el": "h1.title",
+      "value": "800"
+    }
+  ]
+}
