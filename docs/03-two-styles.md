@@ -2,6 +2,7 @@
 
 > 測定日: 2026-08 / 対象: [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) の実在する DESIGN.md **74件**
 > 再現手順は末尾。スクリプトは [`tools/measure.py`](../tools/measure.py)
+> **引用について**: `PHILOSOPHY.md` と `docs/spec.md` は英語で書かれています。本文中の日本語の引用は筆者による訳です。原文は本家リポジトリを参照してください。
 
 このページだけは、仕様書の要約ではなく**実測**です。「どう書くべきか」を決める前に、世の中で実際どう書かれているかを知っておくと迷いが減ります。
 
