@@ -4,8 +4,43 @@
 
 チームで DESIGN.md を書き、レビューし、共同開発できる状態を作ることを目的にしています。
 
+**解説記事（Zenn）: [DESIGN.mdを置くと、どこまで「いい感じ」になるのか — 74件を測って確かめた](https://zenn.dev/ait/articles/google-design-md-measured)**
+
+[![lint DESIGN.md](https://github.com/BoxPistols/design-md-docs/actions/workflows/lint.yml/badge.svg)](https://github.com/BoxPistols/design-md-docs/actions/workflows/lint.yml)
+[![License: CC BY 4.0](https://img.shields.io/github/license/BoxPistols/design-md-docs)](LICENSE)
+
 > 対象バージョン: フォーマット `alpha` / CLI [`@google/design.md`](https://www.npmjs.com/package/@google/design.md) `v0.4.0`
 > 本家: [google-labs-code/design.md](https://github.com/google-labs-code/design.md)
+
+---
+
+## 分かったこと
+
+1. **実物の DESIGN.md は2つの流派に分かれる。** [awesome-design-md](https://github.com/VoltAgent/awesome-design-md) 掲載の74件のうち64件はトークン中心のスキーマ型、10件は frontmatter を持たない散文型。スキーマ型のトークン比率は 48.1〜68.2% で、公式サンプル3件（77.3〜80.7%）とは1件も重ならない。→ [docs/03](docs/03-two-styles.md) / [`tools/measure.py`](tools/measure.py)
+2. **仕様どおりに書いても、警告なし・終了コード0で値が消える箇所がある。** 素の数値、`components` 以外の壊れた参照、一部の色記法など、計7項目を CLI v0.4.0 で再現し、CI での検出方法を添えた。→ [docs/05](docs/05-pitfalls.md) / [`.github/workflows/lint.yml`](.github/workflows/lint.yml)
+3. **実装が Don't を守っているかは、決定的チェッカと LLM judge を分けると判定できる。** computed style を見るチェッカは3実装で誤検出・見逃しともゼロ。スクリーンショットだけを見る LLM judge は判定可能な12項目すべて正解し、画像から分からない font-weight は3枚とも `undetermined` と答えた。→ [docs/07](docs/07-machine-verification.md) / [`tools/probe.mjs`](tools/probe.mjs)
+
+同じカード UI を、DESIGN.md の Don't（アクセント色の文字・Bold・角丸・影・グラデーション）に対して3通り実装したもの（[`sandbox/`](sandbox/)）:
+
+<table>
+<tr>
+<th>A: 準拠</th>
+<th>B: 5項目すべて違反</th>
+<th>C: Bold と影のみ違反</th>
+</tr>
+<tr>
+<td><img src="sandbox/shots/a-compliant.png" width="260" alt="準拠版。罫線で区切った角の小さいカードと、アクセント色のボタン"></td>
+<td><img src="sandbox/shots/b-all-violations.png" width="260" alt="全違反版。アクセント色の見出し、大きな角丸、影、グラデーションの丸いボタン"></td>
+<td><img src="sandbox/shots/c-partial.png" width="260" alt="部分違反版。準拠版にカードの影と太い見出しが加わったもの"></td>
+</tr>
+<tr>
+<td>チェッカ: 0件</td>
+<td>チェッカ: 6件（V1〜V5）</td>
+<td>チェッカ: 2件（V2, V4）</td>
+</tr>
+</table>
+
+A と C の見出しは font-weight 600 と 800 で、画面上はほぼ同じに見えます。この違いは CSS からしか取れません（[docs/07](docs/07-machine-verification.md)）。
 
 ---
 
